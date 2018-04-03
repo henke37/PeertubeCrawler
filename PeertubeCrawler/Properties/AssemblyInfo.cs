@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("PeertubeCrawler")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Figures out the peertube follow graph")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("PeertubeCrawler")]
