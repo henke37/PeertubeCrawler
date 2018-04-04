@@ -16,9 +16,15 @@ namespace PeertubeCrawler {
             this.hostName = hostName;
         }
 
+        public Task UpdateData(Crawler crawler) {
+            var t1= UpdateFollowees(crawler);
+            var t2= UpdateFollowers(crawler);
+
+            return Task.WhenAll(t1,t2);
+        }
+
         public async Task UpdateFollowees(Crawler crawler) {
             followees = new List<Host>();
-
 
             int page = 0;
             for(; ; ) {

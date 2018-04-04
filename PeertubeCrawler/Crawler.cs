@@ -50,13 +50,13 @@ namespace PeertubeCrawler {
                 if(host.followees!=null) {
                     foreach(var followee in host.followees) {
                         int followeeId = hostIds[followee];
-                        graph.AddEdge(followeeId, hostId);
+                        graph.AddEdge(followeeId, hostId, true);
                     }
                 }
                 if(host.followers!=null) {
                     foreach(var follower in host.followers) {
                         int followerId = hostIds[follower];
-                        graph.AddEdge(hostId, followerId);
+                        graph.AddEdge(hostId, followerId, true);
                     }
                 }
             }
@@ -72,8 +72,7 @@ namespace PeertubeCrawler {
                 Console.WriteLine(nextHost.HostName);
 
                 try {
-                    await nextHost.UpdateFollowees(this);
-                    await nextHost.UpdateFollowers(this);
+                    await nextHost.UpdateData(this);
                 } catch(Exception ex) {
                     Console.Out.WriteLine(ex.Message);
                 }
