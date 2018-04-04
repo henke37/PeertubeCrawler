@@ -1,5 +1,6 @@
 ﻿using Mendz.Graph;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,11 +11,11 @@ namespace PeertubeCrawler {
     class Crawler {
 
         private Dictionary<string, Host> hosts;
-        private List<Host> hostsToCrawl;
+        private ConcurrentQueue<Host> hostsToCrawl;
 
         public Crawler() {
             hosts = new Dictionary<string, Host>();
-            hostsToCrawl = new List<Host>();
+            hostsToCrawl = new ConcurrentQueue<Host>();
         }
 
         static void Main(string[] args) {
@@ -64,9 +65,9 @@ namespace PeertubeCrawler {
         }
 
         public async Task Crawl() {
-            while(hostsToCrawl.Count>0) {
-                var nextHost = hostsToCrawl[0];
-                hostsToCrawl.RemoveAt(0);
+            for(; ;) {
+                Host nextHost;
+                if(!hostsToCrawl.TryDequeue(out nextHost)) break;
 
                 Console.WriteLine(nextHost.HostName);
 
@@ -80,12 +81,14 @@ namespace PeertubeCrawler {
         }
 
         public Host GetHost(string hostName) {
-            Host host;
-            if(hosts.TryGetValue(hostName,out host)) return host;
-            host = new Host(hostName);
-            hosts.Add(hostName, host);
-            hostsToCrawl.Add(host);
-            return host;
+            lock(hosts) {
+                Host host;
+                if(hosts.TryGetValue(hostName, out host)) return host;
+                host = new Host(hostName);
+                hosts.Add(hostName, host);
+                hostsToCrawl.Enqueue(host);
+                return host;
+            }
         }
     }
 }
