@@ -9,6 +9,7 @@ namespace PeertubeCrawler {
 
         public List<Host> followees;
         public List<Host> followers;
+        public List<Video> videos;
 
         public string HostName { get => hostName; }
 
@@ -19,8 +20,9 @@ namespace PeertubeCrawler {
         public Task UpdateData(Crawler crawler) {
             var t1= UpdateFollowees(crawler);
             var t2= UpdateFollowers(crawler);
+            var t3 = UpdateVideos();
 
-            return Task.WhenAll(t1,t2);
+            return Task.WhenAll(t1,t2,t3);
         }
 
         public async Task UpdateFollowees(Crawler crawler) {
@@ -58,6 +60,22 @@ namespace PeertubeCrawler {
             } 
         }
 
+        public async Task UpdateVideos() {
+            videos = new List<Video>();
+
+            int page = 0;
+            for(; ; ) {
+                var obj = await fetchVideos(page);
+                foreach(var subobj in obj.data) {
+                    var vid = new Video(subobj);
+                    videos.Add(vid);
+                }
+
+                if(videos.Count >= obj.Value<int>("total")) break;
+                page += obj.data.Count;
+            }
+        }
+
         private async Task<dynamic> fetchUrl(string url) {
             var client = new HttpClient();
             client.Timeout = new System.TimeSpan(0, 0, 5);
@@ -73,6 +91,11 @@ namespace PeertubeCrawler {
 
         private async Task<dynamic> fetchFollowers(int page) {
             var url = "https://" + hostName + "/api/v1/server/followers?start=" + page;
+            return await fetchUrl(url);
+        }
+
+        private async Task<dynamic> fetchVideos(int page) {
+            var url = "https://" + hostName + "/api/v1/videos?filter=local&start=" + page;
             return await fetchUrl(url);
         }
 
