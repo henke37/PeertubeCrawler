@@ -5,10 +5,14 @@
         public string description;
         public float duration;
         public string name;
+        public string language;
+
+        public bool nsfw;
 
         public int views;
         public int likes;
         public int dislikes;
+
 
         public Video(dynamic obj) {
             this.uuid = obj.uuid;
@@ -18,6 +22,8 @@
             this.views = obj.views;
             this.likes = obj.likes;
             this.dislikes = obj.dislikes;
+            this.nsfw = obj.nsfw;
+            this.language = obj.language.id;
         }
 
         public override string ToString() {

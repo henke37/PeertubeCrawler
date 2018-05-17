@@ -20,9 +20,8 @@ namespace PeertubeCrawler {
         public Task UpdateData(Crawler crawler) {
             var t1= UpdateFollowees(crawler);
             var t2= UpdateFollowers(crawler);
-            var t3 = UpdateVideos();
 
-            return Task.WhenAll(t1,t2,t3);
+            return Task.WhenAll(t1,t2);
         }
 
         public async Task UpdateFollowees(Crawler crawler) {

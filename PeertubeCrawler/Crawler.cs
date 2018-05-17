@@ -21,13 +21,17 @@ namespace PeertubeCrawler {
         static void Main(string[] args) {
             var c = new Crawler();
             c.GetHost(args[0]);
-            var t=c.Crawl();
+            Task t = c.CrawlHosts();
             t.Wait();
 
-            Graph graph=c.MakeGraph();
+            t = c.CrawlVideos();
+            t.Wait();
+
+            Graph graph = c.MakeGraph();
 
             string gs = graph.ToString("X", new DOTFormatProvider());
-            File.WriteAllText("graph.dot", gs);
+            var now = DateTime.Now;
+            File.WriteAllText($"graph-{now.ToString("yyyy-MM-dd")}.gv", gs);
         }
 
         public Graph MakeGraph() {
@@ -47,13 +51,13 @@ namespace PeertubeCrawler {
             foreach(var kv in hosts) {
                 Host host = kv.Value;
                 int hostId = hostIds[host];
-                if(host.followees!=null) {
+                if(host.followees != null) {
                     foreach(var followee in host.followees) {
                         int followeeId = hostIds[followee];
                         graph.AddEdge(followeeId, hostId, true);
                     }
                 }
-                if(host.followers!=null) {
+                if(host.followers != null) {
                     foreach(var follower in host.followers) {
                         int followerId = hostIds[follower];
                         graph.AddEdge(hostId, followerId, true);
@@ -64,18 +68,55 @@ namespace PeertubeCrawler {
             return graph;
         }
 
-        public async Task Crawl() {
-            for(; ;) {
-                Host nextHost;
-                if(!hostsToCrawl.TryDequeue(out nextHost)) break;
+        public async Task CrawlHosts() {
+            for(; ; ) {
+                var PendingTasks = new List<Task>();
 
-                Console.WriteLine(nextHost.HostName);
+                while(!hostsToCrawl.IsEmpty) {
+                    Host nextHost;
+                    if(!hostsToCrawl.TryDequeue(out nextHost)) break;
 
-                try {
-                    await nextHost.UpdateData(this);
-                } catch(Exception ex) {
-                    Console.Out.WriteLine(ex.Message);
+                    Task t = Task.Run(async () => {
+
+                        Output(nextHost.HostName);
+
+                        try {
+                            await nextHost.UpdateData(this);
+                        } catch(Exception ex) {
+                            Output(ex.Message);
+                        }
+                    });
+
+                    PendingTasks.Add(t);
                 }
+                await Task.WhenAll(PendingTasks);
+                if(hostsToCrawl.IsEmpty) break;
+            }
+
+        }
+
+        public Task CrawlVideos() {
+            var videoTasks = new List<Task>();
+            foreach(var kv in hosts) {
+                var host = kv.Value;
+                Task t = Task.Run(async () => {
+
+                    Output(host.HostName);
+
+                    try {
+                        await host.UpdateVideos();
+                    } catch(Exception ex) {
+                        Output(ex.Message);
+                    }
+                });
+                videoTasks.Add(t);
+            }
+            return Task.WhenAll(videoTasks);
+        }
+
+        private void Output(string message) {
+            lock(Console.Out) {
+                Console.Out.WriteLine($"[{System.Threading.Thread.CurrentThread.ManagedThreadId}] {message}");
             }
         }
 
