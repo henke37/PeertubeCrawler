@@ -32,6 +32,37 @@ namespace PeertubeCrawler {
             string gs = graph.ToString("X", new DOTFormatProvider());
             var now = DateTime.Now;
             File.WriteAllText($"graph-{now.ToString("yyyy-MM-dd")}.gv", gs);
+
+            DumpHosts(c.hosts);
+            DumpVideos(c);
+        }
+
+        private static void DumpVideos(Crawler c) {
+            var now = DateTime.Now;
+            string path = $"videos-{now.ToString("yyyy-MM-dd")}.csv";
+            using(var w = new StreamWriter(File.OpenWrite(path))) {
+                foreach(var kv in c.hosts) {
+                    var host = kv.Value;
+
+                    if(host.videos == null) continue;
+
+                    foreach(var video in host.videos) {
+                        w.WriteLine($"{host.HostName},{video.uuid},\"{video.name}\",{video.duration},{video.language},{video.user},{video.views}");
+                    }
+                }
+            }
+        }
+
+        private static void DumpHosts(Dictionary<string, Host> hosts) {
+            var now = DateTime.Now;
+            string path = $"hosts-{now.ToString("yyyy-MM-dd")}.txt";
+
+            using(var w=new StreamWriter(File.OpenWrite(path))) {
+                foreach(var kv in hosts) {
+                    var host = kv.Value;
+                    w.WriteLine(host.HostName);
+                }
+            }
         }
 
         public Graph MakeGraph() {

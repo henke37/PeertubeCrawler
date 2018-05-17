@@ -7,6 +7,8 @@
         public string name;
         public string language;
 
+        public string user;
+
         public bool nsfw;
 
         public int views;
@@ -24,6 +26,7 @@
             this.dislikes = obj.dislikes;
             this.nsfw = obj.nsfw;
             this.language = obj.language.id;
+            this.user = obj.account.name;
         }
 
         public override string ToString() {
