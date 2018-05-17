@@ -47,10 +47,14 @@ namespace PeertubeCrawler {
                     if(host.videos == null) continue;
 
                     foreach(var video in host.videos) {
-                        w.WriteLine($"{host.HostName},{video.uuid},\"{video.name}\",{video.duration},{video.language},{video.user},{video.views}");
+                        w.WriteLine($"{host.HostName},{video.uuid},\"{escape(video.name)}\",{video.duration},{video.language},{video.user},{video.views},{video.publishDate}");
                     }
                 }
             }
+        }
+
+        private static string escape(string name) {
+            return name.Replace("\"", "\"\"");
         }
 
         private static void DumpHosts(Dictionary<string, Host> hosts) {

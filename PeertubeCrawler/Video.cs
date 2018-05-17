@@ -7,6 +7,8 @@
         public string name;
         public string language;
 
+        public string publishDate;
+
         public string user;
 
         public bool nsfw;
@@ -21,12 +23,18 @@
             this.description = obj.description;
             this.duration = obj.duration;
             this.name = obj.name;
+
+            this.publishDate = obj.publishedAt;
+
             this.views = obj.views;
             this.likes = obj.likes;
             this.dislikes = obj.dislikes;
+
             this.nsfw = obj.nsfw;
             this.language = obj.language.id;
+
             this.user = obj.account.name;
+
         }
 
         public override string ToString() {
