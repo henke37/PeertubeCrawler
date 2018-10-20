@@ -24,17 +24,22 @@ namespace PeertubeCrawler {
             Task t = c.CrawlHosts();
             t.Wait();
 
-            t = c.CrawlVideos();
-            t.Wait();
 
-            Graph graph = c.MakeGraph();
+
+			DumpHosts(c.hosts);
+
+			Graph graph = c.MakeGraph();
 
             string gs = graph.ToString("X", new DOTFormatProvider());
             var now = DateTime.Now;
             File.WriteAllText($"graph-{now.ToString("yyyy-MM-dd")}.gv", gs);
 
-            DumpHosts(c.hosts);
-            DumpVideos(c);
+
+
+			t = c.CrawlVideos();
+			t.Wait();
+
+			DumpVideos(c);
         }
 
         private static void DumpVideos(Crawler c) {
