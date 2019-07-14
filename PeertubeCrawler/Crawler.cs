@@ -21,10 +21,10 @@ namespace PeertubeCrawler {
         static void Main(string[] args) {
             var c = new Crawler();
             c.GetHost(args[0]);
-            Task t = c.CrawlHosts();
-            t.Wait();
+            Task hostTask = c.CrawlHosts();
+			hostTask.Wait();
 
-
+			Task videoTask = c.CrawlVideos();
 
 			DumpHosts(c.hosts);
 
@@ -34,10 +34,7 @@ namespace PeertubeCrawler {
             var now = DateTime.Now;
             File.WriteAllText($"graph-{now.ToString("yyyy-MM-dd")}.gv", gs);
 
-
-
-			t = c.CrawlVideos();
-			t.Wait();
+			videoTask.Wait();
 
 			DumpVideos(c);
         }
