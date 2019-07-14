@@ -77,7 +77,7 @@ namespace PeertubeCrawler {
 
         private async Task<dynamic> fetchUrl(string url) {
             var client = new HttpClient();
-            client.Timeout = new System.TimeSpan(0, 0, 5);
+            client.Timeout = new System.TimeSpan(0, 0, 25);
             var resp = await client.GetAsync(url);
             var str = await resp.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject(str);
